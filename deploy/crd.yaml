@@ -1,0 +1,33 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: polardeployments.polarsquad.com
+spec:
+  group: polarsquad.com
+  versions:
+    - name: v1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                appName:
+                  type: string
+                containerName:
+                  type: string
+                imageName:
+                  type: string
+                deploymentName:
+                  type: string
+                replicas:
+                  type: integer
+  names:
+    kind: PolarDeployment
+    plural: polardeployments
+    shortNames:
+      - pd
+  scope: Namespaced

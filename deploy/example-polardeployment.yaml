@@ -1,0 +1,10 @@
+apiVersion: polarsquad.com/v1
+kind: PolarDeployment
+metadata:
+  name: example
+spec:
+  appName: example-app
+  containerName: example-container
+  imageName: nginx:latest
+  deploymentName: example-deployment
+  replicas: 1
