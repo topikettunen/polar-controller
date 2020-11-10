@@ -25,7 +25,7 @@ import (
 )
 ```
 
-`k8s.io/code-generated` requires following files to be set before running:
+`k8s.io/code-generator` requires following files to be set before running:
 
 ```
 pkg
