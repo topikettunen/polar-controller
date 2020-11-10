@@ -30,4 +30,5 @@ spec:
     plural: polardeployments
     shortNames:
       - pd
+      - pds
   scope: Namespaced
