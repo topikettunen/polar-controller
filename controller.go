@@ -22,6 +22,7 @@ import (
 	"k8s.io/klog/v2"
 
 	polarv1 "github.com/topikettunen/polar-controller/pkg/apis/polarsquad/v1"
+	v1 "github.com/topikettunen/polar-controller/pkg/apis/polarsquad/v1"
 	clientset "github.com/topikettunen/polar-controller/pkg/client/clientset/versioned"
 	polarscheme "github.com/topikettunen/polar-controller/pkg/client/clientset/versioned/scheme"
 	informers "github.com/topikettunen/polar-controller/pkg/client/informers/externalversions/polarsquad/v1"
@@ -221,6 +222,38 @@ func (c *Controller) processNextWorkItem() bool {
 	return true
 }
 
+// Refer to pkg/apis/polarsquad/v1/types.go for spec
+func (c *Controller) validateSpec(spec v1.PolarDeploymentSpec, key string) error {
+	// We choose to absorb the errors here as the worker would requeue the
+	// resource otherwise. Instead, the next time the resource is updated
+	// the resource will be queued again.
+	appName := spec.AppName
+	if deploymentName == "" {
+		utilruntime.HandleError(fmt.Errorf("%s: app name must be specified", key))
+		return nil
+	}
+	containerName := spec.ContainerName
+	if deploymentName == "" {
+		utilruntime.HandleError(fmt.Errorf("%s: container name must be specified", key))
+		return nil
+	}
+	imageName := spec.DeploymentName
+	if deploymentName == "" {
+		utilruntime.HandleError(fmt.Errorf("%s: deployment name must be specified", key))
+		return nil
+	}
+	deploymentName := spec.DeploymentName
+	if deploymentName == "" {
+		utilruntime.HandleError(fmt.Errorf("%s: deployment name must be specified", key))
+		return nil
+	}
+	replicas := spec.Replicas
+	if deploymentName == "" {
+		utilruntime.HandleError(fmt.Errorf("%s: amount of replicas must be specified", key))
+		return nil
+	}
+}
+
 // syncHandler compares the actual state with the desired, and attempts to
 // converge the two. It then updates the Status block of the PolarDeployment resource
 // with the current status of the resource.
@@ -245,15 +278,8 @@ func (c *Controller) syncHandler(key string) error {
 		return err
 	}
 
-	deploymentName := polarDeployment.Spec.DeploymentName
-
-	if deploymentName == "" {
-		// We choose to absorb the error here as the worker would requeue the
-		// resource otherwise. Instead, the next time the resource is updated
-		// the resource will be queued again.
-		utilruntime.HandleError(fmt.Errorf("%s: deployment name must be specified", key))
-		return nil
-	}
+	// Handle errors more gracefully here
+	_ = validateSpec(polarDeployment.Spec)
 
 	// Get the deployment with the name specified in PolarDeployment.spec
 	deployment, err := c.deploymentsLister.Deployments(polarDeployment.Namespace).Get(deploymentName)
